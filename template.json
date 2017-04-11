@@ -1,0 +1,53 @@
+{
+  "sheets": [
+    {
+      "title": "THONvelopes",
+      "header_row": 1,
+      "header_columns": [
+        "Full Name",
+        "First Name",
+        "Last Name",
+        "Preferred",
+        "Street Address",
+        "City",
+        "State",
+        "ZIP",
+        "Place of Work",
+        "Email",
+        "2018 Checks",
+        "2018 Online Range",
+        "2018 Online Estimate",
+        "2018 Matched"
+      ]
+    },
+    {
+      "title": "Corporate",
+      "header_row": 1,
+      "header_columns": [
+        "Company/Business Name",
+        "Primary Contact Name",
+        "Primary Contact",
+        "Address Line 1",
+        "Address Line 2",
+        "City",
+        "State",
+        "Zip Code",
+        "Phone Number",
+        "Email Address",
+        "Your Relation to the Company"
+      ]
+    },
+    {
+      "title": "Donation Boxes",
+      "header_row": 1,
+      "header_columns": [
+        "Address of Location",
+        "City",
+        "State",
+        "Zip Code",
+        "Name of Company",
+        "Company Phone Number"
+      ]
+    }
+  ]
+}
