@@ -158,5 +158,85 @@
         ]
       }
     ]
+  },
+  {
+    "keywords": ["files", "f"],
+    "description": "Operations performed on single files",
+    "commands": [
+      {
+        "keywords": ["create"],
+        "description": "Create a new file",
+        "commands": [
+          {
+            "keywords": ["blank"],
+            "description": "Creates a blank file with the title specified",
+            "parameters": [
+              {
+                "name": "title",
+                "description": ["Name of the new file"],
+                "required": true
+              }
+            ]
+          },
+          {
+            "keywords": ["template"],
+            "description": "Creates a new file from the template with the title specified",
+            "parameters": [
+              {
+                "name": "title",
+                "description": ["Name of the new file"],
+                "required": true
+              }
+            ]
+          },
+          {
+            "keywords": ["batch"],
+            "description": "Reads a file with a list of names and creates multiple new files with those titles",
+            "commands": [
+              {
+                "keywords": ["blank"],
+                "description": "Creates multiple blank files using the file specified as titles",
+                "parameters": [
+                  {
+                    "name": "file",
+                    "description": ["File containing the list of filenames, one per line"],
+                    "required": true
+                  }
+                ]
+              },
+              {
+                "keywords": ["template"],
+                "description": "Creates multiple new files from template using the file specified as titles",
+                "parameters": [
+                  {
+                    "name": "file",
+                    "description": ["File containing the list of filenames, one per line"],
+                    "required": true
+                  },
+                  {
+                    "name": "suffix",
+                    "description": ["Phrase to put at the end of every title i.e. \"put on website\""],
+                    "required": false
+                  }
+                ]
+              }
+              ]
+          }
+
+        ]
+      },
+      {
+        "keywords": ["delete"],
+        "description": ["Deletes the first file with the specified title"],
+        "confirmation": true,
+        "parameters": [
+          {
+            "name": "title",
+            "description": "Title of file to be deleted",
+            "required": true
+          }
+        ]
+      }
+    ]
   }
 ]

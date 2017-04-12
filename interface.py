@@ -1,6 +1,7 @@
 import shlex
 from collections import deque
 import json
+import sys
 
 
 class Parameter():
@@ -105,13 +106,17 @@ class Command:
                     response = input()
                     if len(response) > 0 and response[0].lower() == "n":
                         return
-            print("Executing... Please Wait...")
             if self.apply_to_all:
-                for entity in self.entities:
+                length = len(self.entities)
+                for index, entity in enumerate(self.entities):
                     self.function(entity, args)
+                    sys.stdout.write("\r{0} of {1} complete".format(index+1, length))
+                    sys.stdout.flush()
+                sys.stdout.write("\rDone\n")
+                sys.stdout.flush()
             else:
                 self.function(args)
-            print("Done")
+                print("Done")
 
     def get(self, keyword):
         for command in self.commands:

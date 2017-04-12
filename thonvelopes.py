@@ -3,10 +3,9 @@ import os
 import string
 import re
 import json
+import sys
 
 from interface import Interface
-from interface import Command
-from interface import Parameter
 
 # noinspection PyUnresolvedReferences
 from apiclient import discovery
@@ -33,6 +32,7 @@ APPLICATION_NAME = 'THONvelope Helper API'
 DRIVE_SERVICE = None
 SHEET_SERVICE = None
 FILES = []
+TEMPLATE = {}
 
 PROPERTIES = {
     'files': "0BzzhJ1bdYANAczU1b0tQby1iOUk",
@@ -40,18 +40,21 @@ PROPERTIES = {
 }
 
 
-def print_error(spreadsheet, error, raw=False):
+def print_error(spreadsheet=None, error="", raw=False):
     if raw:
-        m = re.search("\".+: (.+)\"", str(error))
+        m = re.search("\".+?: (.+)\"", str(error))
         error = m.group(1)
-    print("ERROR in {0}({1}): {2}".format(spreadsheet['name'], spreadsheet['id'], error))
+    if spreadsheet:
+        print("\nERROR in {0}({1}): {2}".format(spreadsheet['name'], spreadsheet['id'], error))
+    else:
+        print("\nERROR: {0}".format(error))
 
 
 def col_to_index(col):
     if type(col) is str:
         col = list(reversed(col.upper()))
     return string.ascii_uppercase.index(col.pop()) if len(col) == 1 else 26 * (
-    string.ascii_uppercase.index(col.pop()) + 1) + col_to_index(col)
+        string.ascii_uppercase.index(col.pop()) + 1) + col_to_index(col)
 
 
 def index_to_col(n):
@@ -255,8 +258,8 @@ def getTotalColumns(spreadsheet, sheet_title):
 
 def getUtilizedColumns(spreadsheet, sheet_title, rownum=1):
     request = SHEET_SERVICE.spreadsheets().values().get(spreadsheetId=spreadsheet['id'],
-                                                         range="'{0}'!A{1}:ZZZ{2}".format(sheet_title, rownum, rownum),
-                                                         majorDimension="ROWS")
+                                                        range="'{0}'!A{1}:ZZZ{2}".format(sheet_title, rownum, rownum),
+                                                        majorDimension="ROWS")
 
     try:
         response = request.execute()
@@ -412,6 +415,132 @@ def moveColumn(spreadsheet, sheet_title, column, location):
         pprint(err)
 
 
+def createFile(title, template=False):
+    data = {
+        'name': title,
+        'mimeType': 'application/vnd.google-apps.spreadsheet',
+        'parents': [PROPERTIES['files']]
+    }
+    request = DRIVE_SERVICE.files().create(body=data)
+
+    try:
+        file = request.execute()
+        FILES.append(file)
+
+        if not template:
+            return
+
+        update = {
+            "requests": []
+        }
+
+        for sheet in TEMPLATE['sheets']:
+            update['requests'].append({
+                "addSheet": {
+                    "properties": {
+                        "title": sheet['title']
+                    }
+                }
+            })
+        update['requests'].append({
+            "deleteSheet": {
+                "sheetId": 0
+            }
+        })
+        sheet_data = SHEET_SERVICE.spreadsheets().batchUpdate(spreadsheetId=file['id'], body=update).execute()
+
+        values_body = {
+            "valueInputOption": "USER_ENTERED",
+            "data": []
+        }
+
+        for sheet in TEMPLATE['sheets']:
+            values_body['data'].append({
+                "range": "'{0}'!A{1}:{2}{1}".format(sheet['title'], sheet['header_row'],
+                                                    index_to_col(len(sheet['header_columns']) - 1)),
+                "values": [sheet['header_columns']]
+            })
+        SHEET_SERVICE.spreadsheets().values().batchUpdate(spreadsheetId=file['id'], body=values_body).execute()
+
+        update = {
+            "requests": []
+        }
+        for index, sheet in enumerate(TEMPLATE['sheets']):
+            update['requests'].append({
+                "repeatCell": {
+                    "range": {
+                        "sheetId": sheet_data['replies'][index]['addSheet']['properties']['sheetId'],
+                        "startRowIndex": sheet['header_row'] - 1,
+                        "endRowIndex": sheet['header_row']
+                    },
+                    "cell": {
+                        "userEnteredFormat": {
+                            "horizontalAlignment": "CENTER",
+                            "textFormat": {
+                                "bold": True
+                            }
+                        }
+                    },
+                    "fields": "userEnteredFormat(textFormat,horizontalAlignment)"
+                }
+            })
+            update['requests'].append({
+                "updateSheetProperties": {
+                    "properties": {
+                        "sheetId": sheet_data['replies'][index]['addSheet']['properties']['sheetId'],
+                        "gridProperties": {
+                            "frozenRowCount": sheet['header_row']
+                        }
+                    },
+                    "fields": "gridProperties.frozenRowCount"
+                }
+            })
+            # Auto-Size Files Pros- Some columns fit better, Cons - Some columns are really, really small
+            # update['requests'].append({
+            #   "autoResizeDimensions": {
+            #     "dimensions": {
+            #       "sheetId": sheet_data['replies'][index]['addSheet']['properties']['sheetId'],
+            #       "dimension": "COLUMNS",
+            #       "startIndex": 0,
+            #       "endIndex": len(sheet['header_columns'])
+            #     }
+            #   }
+            # })
+        SHEET_SERVICE.spreadsheets().batchUpdate(spreadsheetId=file['id'], body=update).execute()
+
+    except HttpError as err:
+        print_error(error=err, raw=True)
+
+
+def batchCreateFile(file, template=False, suffix=""):
+    try:
+        with open(file) as titles:
+            for index, title in enumerate(titles):
+                title = title.strip()
+                if len(suffix) > 0:
+                    title = title + " - " + suffix
+                createFile(title, template)
+                sys.stdout.write("\rCreated file {0}".format(index + 1))
+                sys.stdout.flush()
+            sys.stdout.write("\rDone\n")
+            sys.stdout.flush()
+    except FileNotFoundError:
+        print_error(error="File '{0}' not found".format(file))
+
+
+def deleteFile(title):
+    for file in FILES:
+        if file['name'].lower() == title.lower():
+            request = DRIVE_SERVICE.files().delete(fileId=file['id'])
+            try:
+                request.execute()
+                FILES.remove(file)
+            except HttpError as err:
+                print_error(error=err,raw=True)
+            return
+    print_error(error="Spreadsheet '{0}' not found".format(title))
+
+
 def make_interface():
     interface = Interface()
     interface.set_entities(FILES)
@@ -436,11 +565,23 @@ def make_interface():
         lambda sheet, args: renameColumn(sheet, args[0], args[1], args[2]))
     interface.get('columns').get('move').set_function(lambda sheet, args: moveColumn(sheet, args[0], args[1], args[2]))
 
+    interface.get('files').get('create').get("blank").set_function(lambda args: createFile(args[0], False))
+    interface.get('files').get('create').get("template").set_function(lambda args: createFile(args[0], True))
+
+    interface.get('files').get('create').get("batch").get("blank").set_function(
+        lambda args: batchCreateFile(args[0], False) if len(args) == 1 else batchCreateFile(args[0], False, args[1]))
+    interface.get('files').get('create').get("batch").get("template").set_function(
+        lambda args: batchCreateFile(args[0], True) if len(args) == 1 else batchCreateFile(args[0], True, args[1]))
+    interface.get('files').get('delete').set_function(lambda args: deleteFile(args[0]))
+
     interface.run()
 
 
 def main():
-    global DRIVE_SERVICE, SHEET_SERVICE
+    global DRIVE_SERVICE, SHEET_SERVICE, TEMPLATE
+
+    with open('template.json') as data_file:
+        TEMPLATE = json.load(data_file)
 
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
@@ -452,8 +593,8 @@ def main():
     SHEET_SERVICE = discovery.build('sheets', 'v4', http=http,
                                     discoveryServiceUrl=discoveryUrl)
 
-    make_interface()
-
+    # make_interface()
+    deleteFile("Test File")
 
 if __name__ == '__main__':
     main()
