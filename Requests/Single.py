@@ -2,6 +2,7 @@ import sys
 from googleapiclient.errors import HttpError
 
 import Log
+import visuals
 from . import SHEET_SERVICE, DRIVE_SERVICE, FILES, PROPERTIES, TEMPLATE
 import Info
 
@@ -100,20 +101,17 @@ def createFile(title):
         Log.err(error=err, raw=True)
 
 
-def batchCreateFile(file, suffix=""):
-    try:
-        with open(file) as titles:
-            for index, title in enumerate(titles):
-                title = title.strip()
-                if len(suffix) > 0:
-                    title = title + " - " + suffix
-                createFile(title)
-                sys.stdout.write("\rCreated file {0}".format(index + 1))
-                sys.stdout.flush()
-            sys.stdout.write("\rDone\n")
-            sys.stdout.flush()
-    except FileNotFoundError:
-        Log.err(error="File '{0}' not found".format(file))
+def batchCreateFile(files, suffix=""):
+    for index, title in enumerate(files):
+        title = title.strip()
+        if suffix:
+            title = title + " - " + suffix
+        createFile(title)
+        sys.stdout.write("\rCreated file {0}".format(index + 1))
+        sys.stdout.flush()
+        sys.stdout.write("\rDone\n")
+        sys.stdout.flush()
+        visuals.set_progress(index+1, len(files))
 
 
 def deleteFile(title):

@@ -1,3 +1,5 @@
+import pprint
+
 from appJar import gui
 
 
@@ -47,6 +49,22 @@ def reset(visual_function):
     return wrapper
 
 
+def progress(function):
+    def wrapper(*args, **kwargs):
+        global row
+        app.addMeter("prog", row, 0, 2)
+        app.setMeterFill("prog", "blue")
+        app.hideMeter("prog")
+        row += 1
+        function(*args, **kwargs)
+    return wrapper
+
+
+def set_progress(completed, max):
+    app.showMeter("prog")
+    app.setMeter('prog', float(completed)/max * 100)
+
+
 @reset
 def main_menu(btn=None):
     global row
@@ -66,6 +84,10 @@ def main_menu(btn=None):
     app.setButtonBg("edit", "LemonChiffon")
     app.setButtonBg("consolidate", "PapayaWhip")
     app.setButtonBg("disperse", "Moccasin")
+
+    app.disableButton("edit")
+    app.disableButton("consolidate")
+    app.disableButton("disperse")
 
 
 @reset
@@ -98,6 +120,7 @@ def single_file(btn = None):
 
 @reset
 @up_one(create_file_menu)
+@progress
 @info
 def multiple_files(btn=None):
     global row
@@ -133,6 +156,8 @@ def get_app():
     return app
 
 app = gui("THONvelopes", "500x500")
+progress = gui("Progress", "500x200")
 action = None
 row = 0
-
+max_prog = 0
+current_prog = 0
