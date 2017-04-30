@@ -53,9 +53,6 @@ APPLICATION_NAME = 'THONvelope Helper API'
 
 FILES = []
 
-with open('./template.json') as data_file:
-    TEMPLATE = json.load(data_file)
-
 PROPERTIES = {
     'files': "0BzzhJ1bdYANAczU1b0tQby1iOUk",
     'header_row': 1

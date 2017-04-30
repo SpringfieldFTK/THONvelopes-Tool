@@ -3,7 +3,8 @@ from googleapiclient.errors import HttpError
 
 import Log
 import visuals
-from . import SHEET_SERVICE, DRIVE_SERVICE, FILES, PROPERTIES, TEMPLATE
+from . import SHEET_SERVICE, DRIVE_SERVICE, FILES, PROPERTIES
+import Template
 import Info
 
 
@@ -23,11 +24,11 @@ def createFile(title):
             "requests": []
         }
 
-        for sheet in TEMPLATE['sheets']:
+        for title in Template.get_sheets():
             update['requests'].append({
                 "addSheet": {
                     "properties": {
-                        "title": sheet['title']
+                        "title": title
                     }
                 }
             })
@@ -43,24 +44,24 @@ def createFile(title):
             "data": []
         }
 
-        for sheet in TEMPLATE['sheets']:
+        for title in Template.get_sheets():
             values_body['data'].append({
-                "range": "'{0}'!A{1}:{2}{1}".format(sheet['title'], sheet['header_row'],
-                                                    Info.index_to_col(len(sheet['header_columns']) - 1)),
-                "values": [sheet['header_columns']]
+                "range": "'{0}'!A{1}:{2}{1}".format(title, Template.get_header_row(title),
+                                                    Info.index_to_col(len(Template.get_columns(title)) - 1)),
+                "values": [Template.get_columns(title)]
             })
         SHEET_SERVICE.spreadsheets().values().batchUpdate(spreadsheetId=file['id'], body=values_body).execute()
 
         update = {
             "requests": []
         }
-        for index, sheet in enumerate(TEMPLATE['sheets']):
+        for index, title in enumerate(Template.get_sheets()):
             update['requests'].append({
                 "repeatCell": {
                     "range": {
                         "sheetId": sheet_data['replies'][index]['addSheet']['properties']['sheetId'],
-                        "startRowIndex": sheet['header_row'] - 1,
-                        "endRowIndex": sheet['header_row']
+                        "startRowIndex": Template.get_header_row(title) - 1,
+                        "endRowIndex": Template.get_header_row(title)
                     },
                     "cell": {
                         "userEnteredFormat": {
@@ -78,7 +79,7 @@ def createFile(title):
                     "properties": {
                         "sheetId": sheet_data['replies'][index]['addSheet']['properties']['sheetId'],
                         "gridProperties": {
-                            "frozenRowCount": sheet['header_row']
+                            "frozenRowCount": Template.get_header_row(title)
                         }
                     },
                     "fields": "gridProperties.frozenRowCount"

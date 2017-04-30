@@ -6,7 +6,7 @@ from googleapiclient.errors import HttpError
 import Log
 from Requests import SHEET_SERVICE
 
-INFO = {}
+_INFO = {}
 
 
 def col_to_index(col):
@@ -27,15 +27,15 @@ def index_to_col(n):
 
 
 def getSheetId(spreadsheet, title):
-    if spreadsheet['id'] in INFO:
-        if title in INFO[spreadsheet["id"]]:
-            if "id" in INFO[spreadsheet["id"]][title]:
-                return INFO[spreadsheet["id"]][title]["id"]
+    if spreadsheet['id'] in _INFO:
+        if title in _INFO[spreadsheet["id"]]:
+            if "id" in _INFO[spreadsheet["id"]][title]:
+                return _INFO[spreadsheet["id"]][title]["id"]
         else:
-            INFO[spreadsheet["id"]][title] = {}
+            _INFO[spreadsheet["id"]][title] = {}
     else:
-        INFO[spreadsheet["id"]] = {}
-        INFO[spreadsheet["id"]][title] = {}
+        _INFO[spreadsheet["id"]] = {}
+        _INFO[spreadsheet["id"]][title] = {}
 
     request = SHEET_SERVICE.spreadsheets().get(spreadsheetId=spreadsheet['id'])
 
@@ -44,7 +44,7 @@ def getSheetId(spreadsheet, title):
         for sheet in response['sheets']:
             if sheet['properties']['title'].lower() == title.lower():
                 id = sheet['properties']['sheetId']
-                INFO[spreadsheet["id"]][title]["id"] = id
+                _INFO[spreadsheet["id"]][title]["id"] = id
                 return sheet['properties']['sheetId']
     except HttpError as err:
         Log.err(spreadsheet, err, True)
@@ -53,15 +53,15 @@ def getSheetId(spreadsheet, title):
 
 
 def getSheetIndex(spreadsheet, title):
-    if spreadsheet['id'] in INFO:
-        if title in INFO[spreadsheet["id"]]:
-            if "index" in INFO[spreadsheet["id"]][title]:
-                return INFO[spreadsheet["id"]][title]["index"]
+    if spreadsheet['id'] in _INFO:
+        if title in _INFO[spreadsheet["id"]]:
+            if "index" in _INFO[spreadsheet["id"]][title]:
+                return _INFO[spreadsheet["id"]][title]["index"]
         else:
-            INFO[spreadsheet["id"]][title] = {}
+            _INFO[spreadsheet["id"]][title] = {}
     else:
-        INFO[spreadsheet["id"]] = {}
-        INFO[spreadsheet["id"]][title] = {}
+        _INFO[spreadsheet["id"]] = {}
+        _INFO[spreadsheet["id"]][title] = {}
 
     request = SHEET_SERVICE.spreadsheets().get(spreadsheetId=spreadsheet['id']).execute()
     try:
@@ -69,7 +69,7 @@ def getSheetIndex(spreadsheet, title):
         for sheet in response['sheets']:
             if sheet['properties']['title'].lower() == title.lower():
                 index = sheet['properties']['index']
-                INFO[spreadsheet["id"]][title]["index"] = index
+                _INFO[spreadsheet["id"]][title]["index"] = index
                 return index
     except HttpError as err:
         Log.err(spreadsheet, err, True)
@@ -78,20 +78,20 @@ def getSheetIndex(spreadsheet, title):
 
 
 def getColumnIndex(spreadsheet, sheet_title, contents):
-    if spreadsheet['id'] in INFO:
-        if sheet_title in INFO[spreadsheet["id"]]:
-            if "columns" in INFO[spreadsheet["id"]][sheet_title]:
-                if contents in INFO[spreadsheet["id"]][sheet_title]["columns"]:
-                    return INFO[spreadsheet["id"]][sheet_title]["columns"][contents]
+    if spreadsheet['id'] in _INFO:
+        if sheet_title in _INFO[spreadsheet["id"]]:
+            if "columns" in _INFO[spreadsheet["id"]][sheet_title]:
+                if contents in _INFO[spreadsheet["id"]][sheet_title]["columns"]:
+                    return _INFO[spreadsheet["id"]][sheet_title]["columns"][contents]
             else:
-                INFO[spreadsheet["id"]][sheet_title]["columns"] = {}
+                _INFO[spreadsheet["id"]][sheet_title]["columns"] = {}
         else:
-            INFO[spreadsheet["id"]][sheet_title] = {}
-            INFO[spreadsheet["id"]][sheet_title]["columns"] = {}
+            _INFO[spreadsheet["id"]][sheet_title] = {}
+            _INFO[spreadsheet["id"]][sheet_title]["columns"] = {}
     else:
-        INFO[spreadsheet["id"]] = {}
-        INFO[spreadsheet["id"]][sheet_title] = {}
-        INFO[spreadsheet["id"]][sheet_title]["columns"] = {}
+        _INFO[spreadsheet["id"]] = {}
+        _INFO[spreadsheet["id"]][sheet_title] = {}
+        _INFO[spreadsheet["id"]][sheet_title]["columns"] = {}
 
     request = SHEET_SERVICE.spreadsheets().values().get(spreadsheetId=spreadsheet['id'],
                                                         range="'{0}'!A1:ZZZ1".format(sheet_title),
@@ -100,7 +100,7 @@ def getColumnIndex(spreadsheet, sheet_title, contents):
         response = request.execute()
         for i, cell in enumerate(response['values'][0]):
             if cell.lower() == contents.lower():
-                INFO[spreadsheet["id"]][sheet_title]["columns"][contents] = i
+                _INFO[spreadsheet["id"]][sheet_title]["columns"][contents] = i
                 return i
     except HttpError as err:
         Log.err(spreadsheet, err, True)
@@ -137,3 +137,9 @@ def getUtilizedColumns(spreadsheet, sheet_title, rownum=1):
         Log.err(spreadsheet, err, True)
 
     return -1
+
+
+def deleteSheet(title):
+    for spreadsheet in _INFO:
+        if title in spreadsheet:
+            del spreadsheet[title]

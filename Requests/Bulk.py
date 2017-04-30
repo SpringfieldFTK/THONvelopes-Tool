@@ -3,18 +3,21 @@ from googleapiclient.errors import HttpError
 from . import SHEET_SERVICE, FILES
 import Log
 import Info
+import visuals
 
 
 def bulk(function):
     def wrapper(*args, **kwargs):
-        for file in FILES:
+        l = len(FILES)
+        for index, file in enumerate(FILES):
             kwargs['spreadsheet'] = file
             function(*args,**kwargs)
+            visuals.set_progress(index+1, l)
     return wrapper
 
 
 @bulk
-def addSheet(title, index=-1, spreadsheet=None):
+def addSheet(title, cols, index=-1, spreadsheet=None):
     body = {
         "requests": [
             {
@@ -54,14 +57,37 @@ def addSheet(title, index=-1, spreadsheet=None):
                     },
                     "fields": "userEnteredFormat(textFormat,horizontalAlignment)"
                 }
+            },
+            {
+                "updateSheetProperties": {
+                    "properties": {
+                        "sheetId": Info.getSheetId(spreadsheet, title),
+                        "gridProperties": {
+                            "frozenRowCount": 1
+                        }
+                    },
+                    "fields": "gridProperties.frozenRowCount"
+                }
             }
         ]
     }
 
-    request = SHEET_SERVICE.spreadsheets().batchUpdate(spreadsheetId=spreadsheet['id'], body=body)
+    format_request = SHEET_SERVICE.spreadsheets().batchUpdate(spreadsheetId=spreadsheet['id'], body=body)
+
+    values = [
+        cols
+    ]
+    body = {
+        'values': values
+    }
+    col = Info.index_to_col(len(cols) - 1)
+    value_request = SHEET_SERVICE.spreadsheets().values().update(
+        spreadsheetId=spreadsheet['id'], range="'{0}'!A1:{1}1".format(title, col),
+        valueInputOption="USER_ENTERED", body=body)
 
     try:
-        request.execute()
+        format_request.execute()
+        value_request.execute()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 

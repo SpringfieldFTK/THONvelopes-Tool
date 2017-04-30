@@ -2,12 +2,13 @@ import threading
 
 from appJar import gui
 import visuals
+import Info
+import Template
 
 from Requests import Bulk, Single
 
 
-
-def action(btn):
+def action(btn, extra=None):
     print(btn)
     if btn == "create_single_file":
         name = visuals.get_app().getEntry('name')
@@ -30,6 +31,22 @@ def action(btn):
         visuals.set_info_success("{0} files successfully created".format(len(names)))
         visuals.get_app().clearTextArea('names')
         visuals.get_app().setEntry('suffix', "")
+
+    elif btn == "delete_sheet":
+        title = visuals.get_app().getTabbedFrameSelectedTab("SheetFrame")
+        Bulk.deleteSheet(title)
+        Template.delete_sheet(title)
+        Info.deleteSheet(title)
+        visuals.edit_files()
+
+    elif btn == "add_sheet":
+        title = visuals.get_app().getEntry("title")
+        cols = visuals.get_app().getTextArea("cols").split('\n')
+        index = int(visuals.get_app().getSpinBox("Location in file"))
+        Bulk.addSheet(title, cols, index)
+        Template.add_sheet(title, cols, index)
+        visuals.get_app().setEntry("title", "")
+        visuals.get_app().clearTextArea("cols")
 
 #thonvelopes.main()
 #thonvelopes.addSheet("Bulk Sheet")
