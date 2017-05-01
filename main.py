@@ -34,10 +34,11 @@ def action(btn, extra=None):
 
     elif btn == "delete_sheet":
         title = visuals.get_app().getTabbedFrameSelectedTab("SheetFrame")
-        Bulk.deleteSheet(title)
-        Template.delete_sheet(title)
-        Info.deleteSheet(title)
-        visuals.edit_files()
+        if visuals.get_app().yesNoBox("Confirm Delete", "Are you sure you delete sheet '{0}'?".format(title)):
+            Bulk.deleteSheet(title)
+            Template.delete_sheet(title)
+            Info.deleteSheet(title)
+            visuals.edit_files()
 
     elif btn == "add_sheet":
         title = visuals.get_app().getEntry("title")
@@ -47,6 +48,27 @@ def action(btn, extra=None):
         Template.add_sheet(title, cols, index)
         visuals.get_app().setEntry("title", "")
         visuals.get_app().clearTextArea("cols")
+
+    elif btn == "rename_sheet":
+        title = visuals.get_app().getTabbedFrameSelectedTab("SheetFrame")
+        new_title = visuals.get_app().textBox("Rename " + title, "Please enter a new name for sheet '{0}':".format(title))
+        if new_title:
+            Bulk.renameSheet(title, new_title)
+            Template.rename_sheet(title, new_title)
+            Info.rename_sheet(title, new_title)
+            visuals.edit_files()
+
+    elif btn == "move_sheet":
+        title = visuals.get_app().getTabbedFrameSelectedTab("SheetFrame")
+        max = len(Template.get_sheets())
+        index = visuals.get_app().numberBox("New Index", "Please pick a new index, min of 1, max of {0}:".format(max))
+        if index and 0 < index <= max:
+            Bulk.moveSheet(title, index)
+            Template.moveSheet(title, index)
+            Info.invalidate_indexes()
+            visuals.edit_files()
+        elif index and (index < 0 or index > max):
+            visuals.get_app().errorBox("Number Error", "The index you entered was outside the acceptable range")
 
 #thonvelopes.main()
 #thonvelopes.addSheet("Bulk Sheet")

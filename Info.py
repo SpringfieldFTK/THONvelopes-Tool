@@ -63,7 +63,7 @@ def getSheetIndex(spreadsheet, title):
         _INFO[spreadsheet["id"]] = {}
         _INFO[spreadsheet["id"]][title] = {}
 
-    request = SHEET_SERVICE.spreadsheets().get(spreadsheetId=spreadsheet['id']).execute()
+    request = SHEET_SERVICE.spreadsheets().get(spreadsheetId=spreadsheet['id'])
     try:
         response = request.execute()
         for sheet in response['sheets']:
@@ -143,3 +143,18 @@ def deleteSheet(title):
     for spreadsheet in _INFO:
         if title in spreadsheet:
             del spreadsheet[title]
+
+
+def rename_sheet(title, new_title):
+    for spreadsheet in _INFO:
+        if title in spreadsheet:
+            spreadsheet[new_title] = spreadsheet.pop(title)
+            continue
+
+
+def invalidate_indexes():
+    for spreadsheet in _INFO:
+        for sheet in spreadsheet:
+            if "index" in sheet:
+                del _INFO[spreadsheet][sheet]['index']
+    return None

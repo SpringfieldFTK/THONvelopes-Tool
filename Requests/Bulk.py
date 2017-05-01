@@ -11,8 +11,9 @@ def bulk(function):
         l = len(FILES)
         for index, file in enumerate(FILES):
             kwargs['spreadsheet'] = file
-            function(*args,**kwargs)
-            visuals.set_progress(index+1, l)
+            function(*args, **kwargs)
+            visuals.set_progress(index + 1, l)
+
     return wrapper
 
 
@@ -39,7 +40,7 @@ def addSheet(title, cols, index=-1, spreadsheet=None):
         Log.err(spreadsheet, err, True)
 
     body = {
-        "requests":[
+        "requests": [
             {
                 "repeatCell": {
                     "range": {
@@ -115,9 +116,8 @@ def deleteSheet(title, spreadsheet=None):
         Log.err(spreadsheet, err, True)
 
 
-
 @bulk
-def renameSheet(spreadsheet, oldTitle, newTitle):
+def renameSheet(oldTitle, newTitle, spreadsheet=None):
     id = Info.getSheetId(spreadsheet, title=oldTitle)
     if id < 0:
         return
@@ -142,7 +142,7 @@ def renameSheet(spreadsheet, oldTitle, newTitle):
 
 
 @bulk
-def moveSheet(spreadsheet, title, index):
+def moveSheet(title, index, spreadsheet=None):
     id = Info.getSheetId(spreadsheet, title=title)
     if id < 0:
         return
@@ -282,6 +282,7 @@ def deleteColumn(spreadsheet, sheet_title, column):
         request.execute()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
+
 
 @bulk
 def moveColumn(spreadsheet, sheet_title, column, location):

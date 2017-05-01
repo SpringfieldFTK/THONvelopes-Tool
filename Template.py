@@ -46,5 +46,22 @@ def delete_sheet(title):
             _TEMPLATE['sheets'].pop(index)
             break
 
-def test(title):
-    pass
+
+@update
+def rename_sheet(title, new_title):
+    for index, sheet in enumerate(_TEMPLATE['sheets']):
+        if sheet['title'] == title:
+            _TEMPLATE['sheets'][index]['title'] = new_title
+            break
+
+
+@update
+def moveSheet(title, new_index):
+    for index, sheet in enumerate(_TEMPLATE['sheets']):
+        if sheet['title'] == title:
+            moving_sheet = _TEMPLATE['sheets'].pop(index)
+            if new_index > index:
+                new_index += 1
+            _TEMPLATE['sheets'].insert(new_index, moving_sheet)
+            break
+    return None

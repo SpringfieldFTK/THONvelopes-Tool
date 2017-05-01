@@ -155,8 +155,9 @@ def multiple_files(btn=None):
 @up_one(main_menu)
 @progress
 def edit_files(btn=None):
-    global row
+    global row, action
     app.addNamedButton("Add Sheet", "add_sheet", add_sheet, row, 0, 2, 0)
+    app.setButtonBg("add_sheet", "LightGreen")
     row += 1
     app.startTabbedFrame("SheetFrame", row, 0, 2, 2, 5)
     for index, title in enumerate(Template.get_sheets()):
@@ -164,11 +165,11 @@ def edit_files(btn=None):
         app.setSticky("news")
         app.setExpand("both")
         app.setPadding(5, 5)
-        app.addNamedButton("Edit Columns", title + "_columns", main_menu, 0, 0, 3, 2)
+        app.addNamedButton("Edit Columns", title + "_columns", edit_cols, 0, 0, 3, 2)
         app.addNamedButton("Edit Rows", title + "_rows", main_menu, 0, 3, 3, 2)
-        app.addNamedButton("Rename", title + "_rename", main_menu, 3, 0, 2, 1)
-        app.addNamedButton("Move", title + "_move", main_menu, 3, 2, 2, 1)
-        app.addNamedButton("Delete", title + "_delete", delete_sheet, 3, 4, 2, 1)
+        app.addNamedButton("Rename", title + "_rename", lambda x: action("rename_sheet"), 3, 0, 2, 1)
+        app.addNamedButton("Move", title + "_move", lambda x: action("move_sheet"), 3, 2, 2, 1)
+        app.addNamedButton("Delete", title + "_delete", lambda x: action("delete_sheet"), 3, 4, 2, 1)
         app.setButtonBg(title + "_delete", "Red")
         app.stopTab()
 
@@ -196,17 +197,27 @@ def add_sheet(btn=None):
     app.setTextAreaHeight("cols", 10)
 
 
-def delete_sheet(btn=None):
-    global action
-    title = btn.split('_')[0]
-    if app.yesNoBox("Confirm Delete", "Are you sure you delete sheet '{0}'?".format(title)):
-        action("delete_sheet")
+def edit_cols(btn):
+    title = btn.split("_")[0]
+    app.removeButton(title + "_columns")
+    app.removeButton(title + "_rows")
+    app.removeButton(title + "_rename")
+    app.removeButton(title + "_move")
+    app.removeButton(title + "_delete")
+    app.openTab("SheetFrame",title)
+    app.addNamedButton("Add Column", "add_column", action, 0, 0, 6)
+    app.addOptionBox("cols", Template.get_columns(title), 1, 0, 6)
+    app.addNamedButton("Rename", "rename_col", action, 2, 0, 2)
+    app.addNamedButton("Move", "move_col", action, 2, 2, 2)
+    app.addNamedButton("Delete", "delete_col", action, 2, 4, 2)
+    app.stopTab()
 
 
 def create_gui(action_method):
     global app, action
     action = action_method
     main_menu()
+    app.setBg("Azure")
     app.go()
 
 
