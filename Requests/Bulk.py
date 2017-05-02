@@ -172,7 +172,7 @@ def moveSheet(title, index, spreadsheet=None):
 
 
 @bulk
-def insertColumn(spreadsheet, sheet_title, contents, index=0):
+def add_column(sheet_title, contents, index=0, spreadsheet=None):
     index = int(index)
     if index <= 0:
         index = Info.getUtilizedColumns(spreadsheet, sheet_title)
@@ -235,7 +235,7 @@ def insertColumn(spreadsheet, sheet_title, contents, index=0):
 
 
 @bulk
-def renameColumn(spreadsheet, sheet_title, old_column, new_column):
+def rename_column(sheet_title, old_column, new_column, spreadsheet=None):
     index = Info.getColumnIndex(spreadsheet, sheet_title, old_column)
     if index < 0:
         return
@@ -259,8 +259,8 @@ def renameColumn(spreadsheet, sheet_title, old_column, new_column):
 
 
 @bulk
-def deleteColumn(spreadsheet, sheet_title, column):
-    index = Log.err(spreadsheet, sheet_title, column)
+def delete_column(sheet_title, column, spreadsheet=None):
+    index = Info.getColumnIndex(spreadsheet, sheet_title, column)
     if index < 0:
         return
     request = SHEET_SERVICE.spreadsheets().batchUpdate(spreadsheetId=spreadsheet['id'], body={

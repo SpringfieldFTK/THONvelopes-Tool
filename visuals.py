@@ -197,20 +197,26 @@ def add_sheet(btn=None):
     app.setTextAreaHeight("cols", 10)
 
 
+@reset
+@up_one(edit_files)
+@progress
 def edit_cols(btn):
+    global row
+    app.startLabelFrame("Columns", row, 0, 2)
+
+    app.setSticky("news")
+    app.setExpand("both")
+    app.setPadding(5, 5)
+
     title = btn.split("_")[0]
-    app.removeButton(title + "_columns")
-    app.removeButton(title + "_rows")
-    app.removeButton(title + "_rename")
-    app.removeButton(title + "_move")
-    app.removeButton(title + "_delete")
-    app.openTab("SheetFrame",title)
-    app.addNamedButton("Add Column", "add_column", action, 0, 0, 6)
-    app.addOptionBox("cols", Template.get_columns(title), 1, 0, 6)
-    app.addNamedButton("Rename", "rename_col", action, 2, 0, 2)
-    app.addNamedButton("Move", "move_col", action, 2, 2, 2)
-    app.addNamedButton("Delete", "delete_col", action, 2, 4, 2)
-    app.stopTab()
+    app.addLabel("title", "Editing columns in \n'{0}'".format(title),0,0,6)
+    app.addNamedButton("Add Column", "add_col", action, 1, 0, 6)
+    app.addOptionBox("cols", Template.get_columns(title), 2, 0, 6)
+    app.addNamedButton("Rename", "rename_col", action, 3, 0, 2)
+    app.addNamedButton("Move", "move_col", action, 3, 2, 2)
+    app.addNamedButton("Delete", "delete_col", action, 3, 4, 2)
+
+    app.stopLabelFrame()
 
 
 def create_gui(action_method):

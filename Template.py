@@ -65,3 +65,28 @@ def moveSheet(title, new_index):
             _TEMPLATE['sheets'].insert(new_index, moving_sheet)
             break
     return None
+
+
+@update
+def delete_column(title, col):
+    for index, sheet in enumerate(_TEMPLATE['sheets']):
+        if sheet['title'] == title:
+            _TEMPLATE['sheets'][index]['header_columns'].remove(col)
+            break
+
+
+@update
+def rename_column(title, col, new_col):
+    for index, sheet in enumerate(_TEMPLATE['sheets']):
+        if sheet['title'] == title:
+            index = _TEMPLATE['sheets'][index]['header_columns'].index(col)
+            _TEMPLATE['sheets'][index]['header_columns'][index] = new_col
+            break
+
+
+@update
+def add_column(title, new_col):
+    for index, sheet in enumerate(_TEMPLATE['sheets']):
+        if sheet['title'] == title:
+            index = _TEMPLATE['sheets'][index]['header_columns'].append(new_col)
+            break
