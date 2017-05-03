@@ -15,19 +15,12 @@ import Options
 
 
 def get_credentials():
-    """Gets valid user credentials from storage.
-
-    If nothing has been stored, or if the stored credentials are invalid,
-    the OAuth2 flow is completed to obtain the new credentials.
-
-    Returns:
-        Credentials, the obtained credential.
-    """
     home_dir = os.path.expanduser('~')
     credential_dir = os.path.join(home_dir, '.credentials')
     if not os.path.exists(credential_dir):
         os.makedirs(credential_dir)
-    credential_path = os.path.join(credential_dir, 'thonvelope-helper.json')
+    credential_path = os.path.join(credential_dir,
+                                   'sheets.googleapis.com-python-quickstart.json')
 
     store = Storage(credential_path)
     credentials = store.get()
@@ -35,7 +28,10 @@ def get_credentials():
         flow = client.flow_from_clientsecrets(CLIENT_SECRET_FILE, SCOPES)
         flow.user_agent = APPLICATION_NAME
         if flags:
-            credentials = tools.run_flow(flow, store, flags)
+            credentials = tools.run_flow(flow, store, tools.argparser.parse_args([]))
+        else: # Needed only for compatibility with Python 2.6
+            credentials = tools.run(flow, store)
+        print('Storing credentials to ' + credential_path)
     return credentials
 
 
@@ -52,7 +48,7 @@ def getFileList():
         print("{0} individual files found".format((len(FILES))))
 
 SCOPES = 'https://www.googleapis.com/auth/drive ' + 'https://www.googleapis.com/auth/spreadsheets'
-CLIENT_SECRET_FILE = '../Resources/client_secret.json'
+CLIENT_SECRET_FILE = './Resources/client_secret.json'
 APPLICATION_NAME = 'THONvelope Helper API'
 
 FILES = []
