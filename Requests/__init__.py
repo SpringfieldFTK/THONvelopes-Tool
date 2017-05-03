@@ -52,7 +52,7 @@ def getFileList():
         print("{0} individual files found".format((len(FILES))))
 
 SCOPES = 'https://www.googleapis.com/auth/drive ' + 'https://www.googleapis.com/auth/spreadsheets'
-CLIENT_SECRET_FILE = './../Resources/client_secret.json'
+CLIENT_SECRET_FILE = '../Resources/client_secret.json'
 APPLICATION_NAME = 'THONvelope Helper API'
 
 FILES = []
