@@ -1,13 +1,13 @@
 import json
+import os
 
-with open('./template.json') as data_file:
-    _TEMPLATE = json.load(data_file)
+_TEMPLATE = None
 
 
 def update(func):
     def wrapper(*args, **kwargs):
         func(*args, **kwargs)
-        with open('./template.json', 'w') as outfile:
+        with open('./Resources/template.json', 'w') as outfile:
             json.dump(_TEMPLATE, outfile)
     return wrapper
 
@@ -32,6 +32,8 @@ def get_columns(sheet):
 
 @update
 def add_sheet(title, cols, index):
+    if not "sheets" in _TEMPLATE:
+        _TEMPLATE["sheets"] = []
     _TEMPLATE['sheets'].insert(index-1, {
         "title": title,
         "header_row": 1,
@@ -90,3 +92,9 @@ def add_column(title, new_col):
         if sheet['title'] == title:
             index = _TEMPLATE['sheets'][index]['header_columns'].append(new_col)
             break
+
+
+@update
+def set_template(js):
+    global _TEMPLATE
+    _TEMPLATE = js

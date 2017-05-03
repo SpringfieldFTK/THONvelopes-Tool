@@ -4,7 +4,6 @@ from appJar import gui
 
 import Template
 
-
 def up_one(up_function):
     def real_decorator(function):
         def wrapper(*args, **kwargs):
@@ -232,9 +231,41 @@ def get_app():
     return app
 
 
+def get_text_input(title, message):
+    global result
+    result = ""
+
+    def close_option(btn=None):
+        global result
+        result = text.getEntry("input")
+        text.stop()
+    text = gui(title)
+    text.addLabel("label",message)
+    text.addEntry("input")
+    text.addButton("OK", close_option)
+    text.go()
+    print(result)
+    return result
+
+
+def get_number_input(title, message):
+    global result
+    result = 0
+
+    def close_option(btn=None):
+        global result
+        result = int(text.getEntry("input"))
+        text.stop()
+    text = gui(title)
+    text.addLabel("label",message)
+    text.addNumericEntry("input")
+    text.addButton("OK", close_option)
+    text.go()
+    return result
+
+
 app = gui("THONvelopes", "500x500")
-progress = gui("Progress", "500x200")
 action = None
 row = 0
-max_prog = 0
-current_prog = 0
+result = None
+

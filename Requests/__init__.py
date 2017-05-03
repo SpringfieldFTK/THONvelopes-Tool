@@ -11,6 +11,8 @@ from oauth2client import client
 from oauth2client import tools
 from oauth2client.file import Storage
 
+import Options
+
 
 def get_credentials():
     """Gets valid user credentials from storage.
@@ -39,7 +41,9 @@ def get_credentials():
 
 def getFileList():
     global FILES
-    query = "'{0}' in parents and mimeType='application/vnd.google-apps.spreadsheet'".format(PROPERTIES['files'])
+    folder = Options.get_indiv_folder()
+    print(folder)
+    query = "'{0}' in parents and mimeType='application/vnd.google-apps.spreadsheet'".format(folder)
     results = DRIVE_SERVICE.files().list(q=query, fields='files(id, name)', orderBy='name', pageSize=20).execute()
     FILES = results.get('files', [])
     if not FILES:
@@ -52,11 +56,6 @@ CLIENT_SECRET_FILE = './../client_secret.json'
 APPLICATION_NAME = 'THONvelope Helper API'
 
 FILES = []
-
-PROPERTIES = {
-    'files': "0BzzhJ1bdYANAczU1b0tQby1iOUk",
-    'header_row': 1
-}
 
 credentials = get_credentials()
 http = credentials.authorize(httplib2.Http())

@@ -1,3 +1,5 @@
+import json
+import os
 import threading
 
 from appJar import gui
@@ -111,6 +113,29 @@ def add_col():
 #thonvelopes.main()
 #thonvelopes.addSheet("Bulk Sheet")
 
+
+def import_template():
+    if os.path.isfile("./Resources/template.json"):
+        with open('./Resources/template.json') as data_file:
+            temp = json.load(data_file)
+    else:
+        temp = {}
+        id = visuals.get_text_input("Template ID", "Please paste the ID of a sample file")
+        if not id:
+            exit()
+        sheets = Info.get_sheets(id)
+        temp['sheets'] = []
+        for title in sheets:
+            row_num = visuals.get_number_input("Header Row", "What is the header row for sheet '{0}'".format(title))
+            row = Info.get_row(id, title, row_num)
+            temp['sheets'].append({
+                'title': title,
+                'header_row': row_num,
+                'header_columns': row
+            })
+    Template.set_template(temp)
+
+import_template()
 visuals.create_gui(action)
 
 #Bulk.deleteSheet("Bulk Sheet")

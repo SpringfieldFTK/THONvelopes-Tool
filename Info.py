@@ -1,5 +1,6 @@
 import string
 import re
+from pprint import pprint
 
 from googleapiclient.errors import HttpError
 
@@ -24,6 +25,15 @@ def index_to_col(n):
         string = chr(65 + module) + string
         div = int((div - module) / 26)
     return string
+
+
+def get_sheets(spreadsheet_id):
+    request = SHEET_SERVICE.spreadsheets().get(spreadsheetId=spreadsheet_id)
+    try:
+        response = request.execute()
+        return [x['properties']['title'] for x in response['sheets']]
+    except HttpError as err:
+        Log.err(None, err, True)
 
 
 def getSheetId(spreadsheet, title):
@@ -173,3 +183,14 @@ def rename_column(sheet, col, new_col):
             if "columns" in spreadsheet[sheet]:
                 if col in spreadsheet[sheet]["columns"]:
                     spreadsheet[sheet]["columns"][new_col] = spreadsheet[sheet]["columns"].pop(col)
+
+
+def get_row(spreadsheet_id, sheet, row):
+    request = SHEET_SERVICE.spreadsheets().values().get(spreadsheetId=spreadsheet_id,
+                                                        range="'{0}'!A{1}:ZZZ{1}".format(sheet, row),
+                                                        majorDimension="ROWS")
+    try:
+        response = request.execute()
+        return response['values'][0]
+    except HttpError as err:
+        Log.err(None, err, True)

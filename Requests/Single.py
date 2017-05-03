@@ -3,16 +3,17 @@ from googleapiclient.errors import HttpError
 
 import Log
 import visuals
-from . import SHEET_SERVICE, DRIVE_SERVICE, FILES, PROPERTIES
+from . import SHEET_SERVICE, DRIVE_SERVICE, FILES
 import Template
 import Info
+import Options
 
 
 def createFile(title):
     data = {
         'name': title,
         'mimeType': 'application/vnd.google-apps.spreadsheet',
-        'parents': [PROPERTIES['files']]
+        'parents': [Options.get_indiv_folder()]
     }
     request = DRIVE_SERVICE.files().create(body=data)
 
