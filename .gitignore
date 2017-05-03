@@ -3,3 +3,9 @@
 __pycache__/
 Resources/*
 /template.json
+pip-selfcheck.json
+Include/
+Lib/
+Resources/
+Scripts/
+tcl/
