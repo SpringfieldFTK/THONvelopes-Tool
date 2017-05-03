@@ -5,7 +5,7 @@ from pprint import pprint
 from googleapiclient.errors import HttpError
 
 import Log
-from Requests import SHEET_SERVICE
+from Requests import RateLimiter, SHEET_SERVICE
 
 _INFO = {}
 
@@ -31,6 +31,7 @@ def get_sheets(spreadsheet_id):
     request = SHEET_SERVICE.spreadsheets().get(spreadsheetId=spreadsheet_id)
     try:
         response = request.execute()
+        RateLimiter.read_request()
         return [x['properties']['title'] for x in response['sheets']]
     except HttpError as err:
         Log.err(None, err, True)
@@ -51,6 +52,7 @@ def getSheetId(spreadsheet, title):
 
     try:
         response = request.execute()
+        RateLimiter.read_request()
         for sheet in response['sheets']:
             if sheet['properties']['title'].lower() == title.lower():
                 id = sheet['properties']['sheetId']
@@ -76,6 +78,7 @@ def getSheetIndex(spreadsheet, title):
     request = SHEET_SERVICE.spreadsheets().get(spreadsheetId=spreadsheet['id'])
     try:
         response = request.execute()
+        RateLimiter.read_request()
         for sheet in response['sheets']:
             if sheet['properties']['title'].lower() == title.lower():
                 index = sheet['properties']['index']
@@ -108,6 +111,8 @@ def getColumnIndex(spreadsheet, sheet_title, contents):
                                                         majorDimension="ROWS")
     try:
         response = request.execute()
+        RateLimiter.read_request()
+
         for i, cell in enumerate(response['values'][0]):
             if cell.lower() == contents.lower():
                 _INFO[spreadsheet["id"]][sheet_title]["columns"][contents] = i
@@ -125,6 +130,8 @@ def getTotalColumns(spreadsheet, sheet_title):
                                                         majorDimension="ROWS")
     try:
         response = request.execute()
+        RateLimiter.read_request()
+
         end = (response['range'].split(':'))[1]
         m = re.search('[A-Z]+', end)
         return col_to_index(m.group(0)) + 1
@@ -139,6 +146,8 @@ def getUtilizedColumns(spreadsheet, sheet_title, rownum=1):
 
     try:
         response = request.execute()
+        RateLimiter.read_request()
+
         if 'values' in response:
             return len(response['values'][0])
         else:
@@ -191,6 +200,8 @@ def get_row(spreadsheet_id, sheet, row):
                                                         majorDimension="ROWS")
     try:
         response = request.execute()
+        RateLimiter.read_request()
+
         return response['values'][0]
     except HttpError as err:
         Log.err(None, err, True)

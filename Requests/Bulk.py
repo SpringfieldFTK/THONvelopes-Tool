@@ -1,6 +1,6 @@
 from googleapiclient.errors import HttpError
 
-from . import SHEET_SERVICE, FILES
+from . import RateLimiter, SHEET_SERVICE, FILES
 import Log
 import Info
 import visuals
@@ -33,9 +33,11 @@ def addSheet(title, cols, index=-1, spreadsheet=None):
     if int(index) >= 0:
         body['requests'][0]['addSheet']['properties']['index'] = int(index) - 1
     request = SHEET_SERVICE.spreadsheets().batchUpdate(spreadsheetId=spreadsheet['id'], body=body)
+    RateLimiter.write_request()
 
     try:
         request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 
@@ -88,7 +90,9 @@ def addSheet(title, cols, index=-1, spreadsheet=None):
 
     try:
         format_request.execute()
+        RateLimiter.write_request()
         value_request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 
@@ -112,6 +116,7 @@ def deleteSheet(title, spreadsheet=None):
 
     try:
         request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 
@@ -137,6 +142,7 @@ def renameSheet(oldTitle, newTitle, spreadsheet=None):
 
     try:
         request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 
@@ -167,6 +173,7 @@ def moveSheet(title, index, spreadsheet=None):
 
     try:
         request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 
@@ -191,6 +198,7 @@ def add_column(sheet_title, contents, index=0, spreadsheet=None):
             })
             try:
                 request.execute()
+                RateLimiter.write_request()
             except HttpError as err:
                 Log.err(spreadsheet, err, True)
                 return
@@ -213,6 +221,7 @@ def add_column(sheet_title, contents, index=0, spreadsheet=None):
         })
         try:
             request.execute()
+            RateLimiter.write_request()
         except HttpError as err:
             Log.err(spreadsheet, err, True)
             return
@@ -230,6 +239,7 @@ def add_column(sheet_title, contents, index=0, spreadsheet=None):
         valueInputOption="USER_ENTERED", body=body)
     try:
         request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 
@@ -254,6 +264,7 @@ def rename_column(sheet_title, old_column, new_column, spreadsheet=None):
 
     try:
         request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 
@@ -280,20 +291,25 @@ def delete_column(sheet_title, column, spreadsheet=None):
     })
     try:
         request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
 
 
 @bulk
-def moveColumn(spreadsheet, sheet_title, column, location):
+def move_column(sheet_title, column, location, spreadsheet=None):
     location = int(location)
     index = Info.getColumnIndex(spreadsheet, sheet_title, column)
 
     if index < 0:
         return
 
-    if location <= index:
-        location -= 1
+    if location > index:
+        location += 1
+
+
+    #print(location)
+    #print(index)
     request = SHEET_SERVICE.spreadsheets().batchUpdate(spreadsheetId=spreadsheet['id'], body={
         "requests": [
             {
@@ -313,5 +329,6 @@ def moveColumn(spreadsheet, sheet_title, column, location):
 
     try:
         request.execute()
+        RateLimiter.write_request()
     except HttpError as err:
         Log.err(spreadsheet, err, True)
