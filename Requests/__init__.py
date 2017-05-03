@@ -40,7 +40,7 @@ def getFileList():
     folder = Options.get_indiv_folder()
     print(folder)
     query = "'{0}' in parents and mimeType='application/vnd.google-apps.spreadsheet'".format(folder)
-    results = DRIVE_SERVICE.files().list(q=query, fields='files(id, name)', orderBy='name', pageSize=20).execute()
+    results = DRIVE_SERVICE.files().list(q=query, fields='files(id, name)', orderBy='name', pageSize=1000).execute()
     FILES = results.get('files', [])
     if not FILES:
         print('No individual files found')
