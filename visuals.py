@@ -165,13 +165,12 @@ def edit_files(btn=None):
         app.setExpand("both")
         app.setPadding(5, 5)
         app.addNamedButton("Edit Columns", title + "_columns", edit_cols, 0, 0, 3, 2)
-        app.addNamedButton("Edit Rows", title + "_rows", main_menu, 0, 3, 3, 2)
+        app.addNamedButton("Edit Rows", title + "_rows", edit_rows, 0, 3, 3, 2)
         app.addNamedButton("Rename", title + "_rename", lambda x: action("rename_sheet"), 3, 0, 2, 1)
         app.addNamedButton("Move", title + "_move", lambda x: action("move_sheet"), 3, 2, 2, 1)
         app.addNamedButton("Delete", title + "_delete", lambda x: action("delete_sheet"), 3, 4, 2, 1)
         app.setButtonBg(title + "_delete", "Red")
 
-        app.disableButton(title + "_rows")
         app.stopTab()
 
     app.stopTabbedFrame()
@@ -216,6 +215,32 @@ def edit_cols(btn):
     app.addNamedButton("Rename", "rename_col", action, 3, 0, 2)
     app.addNamedButton("Move", "move_col", action, 3, 2, 2)
     app.addNamedButton("Delete", "delete_col", action, 3, 4, 2)
+
+    app.stopLabelFrame()
+
+
+@reset
+@up_one(edit_files)
+@progress
+def edit_rows(btn):
+    global row
+    app.startLabelFrame("Rows", row, 0, 2)
+
+    app.setSticky("news")
+    app.setExpand("both")
+    app.setPadding(5, 5)
+
+    title = btn.split("_")[0]
+    app.addLabel("title", "Editing rows in \n'{0}'".format(title),0,0,6)
+    app.addNamedButton("Add Row", "add_row", action, 1, 0, 6)
+    app.addOptionBox("rows", Template.get_rows(title), 2, 0, 6)
+    app.addNamedButton("Rename", "rename_row", action, 3, 0, 2)
+    app.addNamedButton("Move", "move_row", action, 3, 2, 2)
+    app.addNamedButton("Delete", "delete_row", action, 3, 4, 2)
+
+    app.disableButton("rename_row")
+    app.disableButton("delete_row")
+    app.disableButton("move_row")
 
     app.stopLabelFrame()
 

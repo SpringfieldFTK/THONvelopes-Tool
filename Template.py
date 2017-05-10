@@ -114,3 +114,19 @@ def move_column(title, col, new_index):
             print(_TEMPLATE['sheets'][sheet_index]['header_columns'])
             break
     return None
+
+
+def get_rows(sheet):
+    for s in _TEMPLATE['sheets']:
+        if s['title'] == sheet:
+            return s['rows']
+    return None
+
+
+@update
+def add_row(title, new_row):
+    for index, sheet in enumerate(_TEMPLATE['sheets']):
+        if sheet['title'] == title:
+            _TEMPLATE['sheets'][index]['rows'].append(new_row)
+            _TEMPLATE['sheets'][index]['header_row'] += 1
+            break

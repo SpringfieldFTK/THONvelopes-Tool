@@ -205,3 +205,16 @@ def get_row(spreadsheet_id, sheet, row):
         return response['values'][0]
     except HttpError as err:
         Log.err(None, err, True)
+
+
+def get_first_col(spreadsheet_id, sheet, row):
+    request = SHEET_SERVICE.spreadsheets().values().get(spreadsheetId=spreadsheet_id,
+                                                        range="'{0}'!A1:A{1}".format(sheet, row - 1),
+                                                        majorDimension="COLUMNS")
+    try:
+        response = request.execute()
+        RateLimiter.read_request()
+
+        return response['values'][0]
+    except HttpError as err:
+        Log.err(None, err, True)

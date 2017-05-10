@@ -124,6 +124,16 @@ def move_col():
         Info.delete_columns(sheet)
         visuals.get_app().changeOptionBox("cols", Template.get_columns(sheet), 0)
 
+
+def add_row():
+    sheet = visuals.get_app().getLabel("title").split("'")[1]
+    new_row = visuals.get_app().textBox("Add Row",
+                                        "Please enter a name for the new row in sheet '{0}':".format(sheet))
+    if new_row:
+        Bulk.add_row(sheet, new_row)
+        Template.add_row(sheet, new_row)
+        visuals.get_app().changeOptionBox("rows", Template.get_rows(sheet), 0)
+
 #thonvelopes.main()
 #thonvelopes.addSheet("Bulk Sheet")
 
@@ -142,10 +152,14 @@ def import_template():
         for title in sheets:
             row_num = visuals.get_number_input("Header Row", "What is the header row for sheet '{0}'".format(title))
             row = Info.get_row(id, title, row_num)
+            rows = []
+            if row_num > 1:
+                rows = Info.get_first_col(id, title, row_num)
             temp['sheets'].append({
                 'title': title,
                 'header_row': row_num,
-                'header_columns': row
+                'header_columns': row,
+                'rows': rows
             })
     Template.set_template(temp)
 

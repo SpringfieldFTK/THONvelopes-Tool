@@ -1,5 +1,6 @@
 from googleapiclient.errors import HttpError
 
+import Template
 from . import RateLimiter, SHEET_SERVICE, FILES
 import Log
 import Info
@@ -327,6 +328,48 @@ def move_column(sheet_title, column, location, spreadsheet=None):
 
     })
 
+    try:
+        request.execute()
+        RateLimiter.write_request()
+    except HttpError as err:
+        Log.err(spreadsheet, err, True)
+
+
+@bulk
+def add_row(sheet, new_row, spreadsheet=None):
+    request = SHEET_SERVICE.spreadsheets().batchUpdate(spreadsheetId=spreadsheet['id'], body={
+        "requests": [
+            {
+                "insertDimension": {
+                    "range": {
+                        "sheetId": Info.getSheetId(spreadsheet, sheet),
+                        "dimension": "ROWS",
+                        "startIndex": Template.get_header_row(sheet)-1,
+                        "endIndex": Template.get_header_row(sheet)
+                    },
+                    "inheritFromBefore": False
+                }
+            },
+        ]
+    })
+
+    try:
+        request.execute()
+        RateLimiter.write_request()
+    except HttpError as err:
+        Log.err(spreadsheet, err, True)
+
+    values = [
+        [
+            new_row
+        ],
+    ]
+    body = {
+        'values': values
+    }
+    request = SHEET_SERVICE.spreadsheets().values().update(
+        spreadsheetId=spreadsheet['id'], range="'{0}'!A{1}:A{1}".format(sheet, Template.get_header_row(sheet)),
+        valueInputOption="USER_ENTERED", body=body)
     try:
         request.execute()
         RateLimiter.write_request()
