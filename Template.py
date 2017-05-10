@@ -1,5 +1,4 @@
 import json
-import os
 
 _TEMPLATE = None
 
@@ -9,6 +8,7 @@ def update(func):
         func(*args, **kwargs)
         with open('./Resources/template.json', 'w') as outfile:
             json.dump(_TEMPLATE, outfile)
+
     return wrapper
 
 
@@ -32,9 +32,9 @@ def get_columns(sheet):
 
 @update
 def add_sheet(title, cols, index):
-    if not "sheets" in _TEMPLATE:
+    if "sheets" not in _TEMPLATE:
         _TEMPLATE["sheets"] = []
-    _TEMPLATE['sheets'].insert(index-1, {
+    _TEMPLATE['sheets'].insert(index - 1, {
         "title": title,
         "header_row": 1,
         "header_columns": cols
@@ -90,7 +90,7 @@ def rename_column(title, col, new_col):
 def add_column(title, new_col):
     for index, sheet in enumerate(_TEMPLATE['sheets']):
         if sheet['title'] == title:
-            index = _TEMPLATE['sheets'][index]['header_columns'].append(new_col)
+            _TEMPLATE['sheets'][index]['header_columns'].append(new_col)
             break
 
 
@@ -98,3 +98,19 @@ def add_column(title, new_col):
 def set_template(js):
     global _TEMPLATE
     _TEMPLATE = js
+
+
+@update
+def move_column(title, col, new_index):
+    for sheet_index, sheet in enumerate(_TEMPLATE['sheets']):
+        if sheet['title'] == title:
+            print(_TEMPLATE['sheets'][sheet_index]['header_columns'])
+            old_index = _TEMPLATE['sheets'][sheet_index]['header_columns'].index(col)
+            print(old_index)
+            moving_col = _TEMPLATE['sheets'][sheet_index]['header_columns'].pop(old_index)
+            print(_TEMPLATE['sheets'][sheet_index]['header_columns'])
+            print(new_index)
+            _TEMPLATE['sheets'][sheet_index]['header_columns'].insert(new_index, moving_col)
+            print(_TEMPLATE['sheets'][sheet_index]['header_columns'])
+            break
+    return None

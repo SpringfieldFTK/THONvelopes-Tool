@@ -181,9 +181,9 @@ def invalidate_indexes():
 
 def delete_columns(sheet):
     for spreadsheet in _INFO:
-        if sheet in spreadsheet:
-            if "columns" in spreadsheet[sheet]:
-                del spreadsheet[sheet]["columns"]
+        if sheet in _INFO[spreadsheet]:
+            if "columns" in _INFO[spreadsheet][sheet]:
+                del _INFO[spreadsheet][sheet]["columns"]
 
 
 def rename_column(sheet, col, new_col):

@@ -110,6 +110,20 @@ def add_col():
         Template.add_column(sheet, new_col)
         visuals.get_app().changeOptionBox("cols", Template.get_columns(sheet), 0)
 
+
+def move_col():
+    sheet = visuals.get_app().getLabel("title").split("'")[1]
+    col = visuals.get_app().getOptionBox("cols")
+    loc = visuals.get_app().textBox("Move Column",
+                                        "Please enter the location (A, B, etc) to which you would like to move column "
+                                        "'{0}' in sheet '{1}':".format(col, sheet))
+    if loc:
+        index = Info.col_to_index(loc)
+        Bulk.move_column(sheet, col, index)
+        Template.move_column(sheet, col, index)
+        Info.delete_columns(sheet)
+        visuals.get_app().changeOptionBox("cols", Template.get_columns(sheet), 0)
+
 #thonvelopes.main()
 #thonvelopes.addSheet("Bulk Sheet")
 
