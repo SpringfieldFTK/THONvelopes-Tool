@@ -170,6 +170,8 @@ def edit_files(btn=None):
         app.addNamedButton("Move", title + "_move", lambda x: action("move_sheet"), 3, 2, 2, 1)
         app.addNamedButton("Delete", title + "_delete", lambda x: action("delete_sheet"), 3, 4, 2, 1)
         app.setButtonBg(title + "_delete", "Red")
+
+        app.disableButton(title + "_rows")
         app.stopTab()
 
     app.stopTabbedFrame()
