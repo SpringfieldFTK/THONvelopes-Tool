@@ -5,6 +5,7 @@ from pprint import pprint
 from googleapiclient.errors import HttpError
 
 import Log
+import Template
 from Requests import RateLimiter, SHEET_SERVICE
 
 _INFO = {}
@@ -106,8 +107,10 @@ def getColumnIndex(spreadsheet, sheet_title, contents):
         _INFO[spreadsheet["id"]][sheet_title] = {}
         _INFO[spreadsheet["id"]][sheet_title]["columns"] = {}
 
+    row = Template.get_header_row(sheet_title)
+
     request = SHEET_SERVICE.spreadsheets().values().get(spreadsheetId=spreadsheet['id'],
-                                                        range="'{0}'!A1:ZZZ1".format(sheet_title),
+                                                        range="'{0}'!A{1}:ZZZ{1}".format(sheet_title, row),
                                                         majorDimension="ROWS")
     try:
         response = request.execute()
@@ -125,8 +128,9 @@ def getColumnIndex(spreadsheet, sheet_title, contents):
 
 
 def getTotalColumns(spreadsheet, sheet_title):
+    row = Template.get_header_row(sheet_title)
     request = SHEET_SERVICE.spreadsheets().values().get(spreadsheetId=spreadsheet['id'],
-                                                        range="'{0}'!A1:ZZZ1".format(sheet_title),
+                                                        range="'{0}'!A{1}:ZZZ{1}".format(sheet_title, row),
                                                         majorDimension="ROWS")
     try:
         response = request.execute()
